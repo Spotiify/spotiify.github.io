@@ -68,12 +68,12 @@
                 });
                 const data = await response.json();
 
-                this.songs = data.items.map(item => ({
+                    this.songs = data.items ? data.items.map(item => ({
                     title: item.track.name,
                     artist: item.track.artists[0].name,
                     cover: item.track.album.images[0].url,
                     audio: item.track.preview_url
-                }));
+                })) : [];
                 
                 this.loading = false;
             }
