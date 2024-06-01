@@ -19,7 +19,7 @@
 
 <body class="bg-gray-100">
     <div id="app" class="container mx-auto p-4">
-        <h1 class="text-3xl font-semibold mb-4">Spotiify</h1>
+        <h1 class="text-3xl font-semibold mb-4">Spotiify Clone</h1>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div v-for="(song, index) in songs" :key="index" class="music-card bg-white rounded-md shadow-md p-4">
                 <img :src="song.cover" alt="song" class="w-full mb-4">
@@ -37,12 +37,36 @@
         new Vue({
             el: '#app',
             data: {
-                songs: [
-                    { title: 'Song 1', artist: 'Artist 1', cover: 'song1.jpg', audio: 'song1.mp3' },
-                    { title: 'Song 2', artist: 'Artist 2', cover: 'song2.jpg', audio: 'song2.mp3' },
-                    { title: 'Song 3', artist: 'Artist 3', cover: 'song3.jpg', audio: 'song3.mp3' },
-                    { title: 'Song 4', artist: 'Artist 4', cover: 'song4.jpg', audio: 'song4.mp3' }
-                ]
+                songs: []
+            },
+            async mounted() {
+                const clientId = 'c3e8690562964475b47b5ca1cc89eb5a';
+                const clientSecret = '34a790b2d0154354856372c5c6135c19';
+                
+                const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Basic ' + btoa(`${clientId}:${clientSecret}`)
+                    },
+                    body: 'grant_type=client_credentials'
+                });
+                const tokenData = await tokenResponse.json();
+                const accessToken = tokenData.access_token;
+
+                const response = await fetch('https://api.spotify.com/v1/me/tracks', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                const data = await response.json();
+
+                this.songs = data.items.map(item => ({
+                    title: item.track.name,
+                    artist: item.track.artists[0].name,
+                    cover: item.track.album.images[0].url,
+                    audio: item.track.preview_url
+                }));
             }
         });
     </script>
